@@ -2,5 +2,22 @@
 
 intList Add(intList lhs, intList rhs)
 {
-    return intList();
+    if (lhs.empty())
+    {
+        return rhs;
+    }
+    else if (rhs.empty())
+    {
+        return lhs;
+    }
+
+    // Add the two first digits together.
+    unsigned int sum = lhs.front() + rhs.front();
+    // lhs.pop_front();
+    // rhs.pop_front();
+
+    intList result;
+    result.push_back(sum);
+
+    return result;
 }
