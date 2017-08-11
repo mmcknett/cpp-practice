@@ -82,3 +82,48 @@ BOOST_AUTO_TEST_CASE(Add_fourToSix_ReturnsTwoDigitTen)
     // Assert
     BOOST_TEST(result == expected);
 }
+
+// Input: (2 -> 4 -> 3) + (5 -> 6 -> 4)
+// Output: 7 -> 0 -> 8
+
+BOOST_AUTO_TEST_CASE(Add_342to465_Returns807)
+{
+    // Arrange
+    intList lhs = {2, 4, 3};
+    intList rhs = {5, 6, 4};
+    intList expected = {7, 0, 8};
+
+    // Act
+    intList result = Add(lhs, rhs);
+
+    // Assert
+    BOOST_TEST(result == expected);
+}
+
+BOOST_AUTO_TEST_CASE(Add_999to1_Returns1000)
+{
+    // Arrange
+    intList lhs = {9, 9, 9};
+    intList rhs = {1};
+    intList expected = {0, 0, 0, 1};
+
+    // Act
+    intList result = Add(lhs, rhs);
+
+    // Assert
+    BOOST_TEST(result == expected);
+}
+
+BOOST_AUTO_TEST_CASE(Add_1to999_Returns1000)
+{
+    // Arrange
+    intList lhs = {1};
+    intList rhs = {9, 9, 9};
+    intList expected = {0, 0, 0, 1};
+
+    // Act
+    intList result = Add(lhs, rhs);
+
+    // Assert
+    BOOST_TEST(result == expected);
+}
