@@ -1,2 +1,10 @@
-// This file is blank, but you should add code that can be tested
-// and used in production here.
+#include <stdexcept>
+#include "lru_cache.h"
+
+LruCache::LruCache(unsigned int capacity)
+{
+    if (capacity < 1)
+    {
+        throw std::invalid_argument("Capacity must be more than 1.");
+    }
+}
