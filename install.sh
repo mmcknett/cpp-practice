@@ -5,7 +5,7 @@ FLAVOR=release
 
 BUILD_DIR=build/$FLAVOR
 
-PROJECT_NAME=interview_practice
+PROJECT_NAME=adder
 
 install_project() {
     cd $BUILD_DIR/$PROJECT_NAME
