@@ -27,30 +27,30 @@ includes = include_directories(boost_inc)
 lib_sources = ['adder_lib.cpp']
 
 # Add the sources that comprise your unit tests here.
-unit_test_sources = ['interview_practice_test.cpp']
+unit_test_sources = ['adder_test.cpp']
 
 # Add the sources that comprise your executable here.
-exe_sources = ['interview_practice_exe.cpp']
+exe_sources = ['adder_exe.cpp']
 
 
-interview_practice_lib = static_library(
-          'interview_practice_lib',
+adder_lib = static_library(
+          'adder_lib',
           lib_sources)
 
-interview_practice_tests = executable(
-          'interview_practice_tests',
+adder_tests = executable(
+          'adder_tests',
           sources: unit_test_sources,
           include_directories: includes,
-          link_with: interview_practice_lib,
+          link_with: adder_lib,
           dependencies: boost_utfw)
 
-interview_practice_exe = executable(
-          'interview_practice',
+adder_exe = executable(
+          'adder',
           sources: exe_sources,
           include_directories: includes,
-          link_with: interview_practice_lib,
+          link_with: adder_lib,
 # Uncomment this line and add a pch.h file in the pch directory to get a precompiled header.
 #          cpp_pch: 'pch/pch.h',
           install: true)
 
-test('Unit Tests', interview_practice_tests)
+test('Unit Tests', adder_tests)
