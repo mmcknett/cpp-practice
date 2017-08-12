@@ -5,11 +5,12 @@ FLAVOR=release
 
 BUILD_DIR=build/$FLAVOR
 
-PROJECT_NAME=adder
-
 install_project() {
-    cd $BUILD_DIR/$PROJECT_NAME
-    ninja install
+    for dir in $BUILD_DIR/*/ ; do
+        pushd $dir
+        ninja install
+        popd
+    done
 }
 
 setup_and_ninja_and_install() {
