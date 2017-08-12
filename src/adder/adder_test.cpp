@@ -127,3 +127,27 @@ BOOST_AUTO_TEST_CASE(Add_1to999_Returns1000)
     // Assert
     BOOST_TEST(result == expected);
 }
+
+BOOST_AUTO_TEST_CASE(Add_1toAThousand9s_ReturnsTenToThe1001)
+{
+    // Arrange
+    intList lhs = {1};
+    intList rhs;
+    for (int i = 0; i < 1000; ++i)
+    {
+        rhs.push_back(9);
+    }
+
+    intList expected;
+    for (int i = 0; i < 1000; ++i)
+    {
+        expected.push_back(0);
+    }
+    expected.push_back(1);
+
+    // Act
+    intList result = Add(lhs, rhs);
+
+    // Assert
+    BOOST_TEST(result == expected);
+}
