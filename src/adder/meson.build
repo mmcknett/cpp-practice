@@ -24,7 +24,8 @@ boost_utfw = cc.find_library('boost_unit_test_framework', dirs : boost_lib)
 includes = include_directories(boost_inc)
 
 # Add the sources that comprise your library here.
-lib_sources = ['adder_lib.cpp']
+#lib_sources = ['adder_alternate_lib.cpp'] # The alternate_lib version is an adaptation from a Java solution.
+lib_sources = ['adder_lib.cpp'] # The original version is my solution.
 
 # Add the sources that comprise your unit tests here.
 unit_test_sources = ['adder_test.cpp']

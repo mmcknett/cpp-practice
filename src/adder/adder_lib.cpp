@@ -1,7 +1,5 @@
 #include "adder.h"
 
-#include <iostream>
-
 unsigned int popNextDigit(intList& number)
 {
     unsigned int digit;
@@ -17,7 +15,7 @@ unsigned int popNextDigit(intList& number)
     return digit;
 }
 
-intList Add(intList lhs, intList rhs)
+intList Add(const intList& lhs, const intList& rhs)
 {
     if (lhs.empty())
     {
@@ -29,13 +27,15 @@ intList Add(intList lhs, intList rhs)
         return lhs;
     }
 
+    intList lhsCopy = lhs;
+    intList rhsCopy = rhs;
     intList result;
     unsigned int carry = 0;
 
-    while ((!lhs.empty() && !rhs.empty()) || carry > 0)
+    while ((!lhsCopy.empty() && !rhsCopy.empty()) || carry > 0)
     {
-        unsigned int lhsDigit = popNextDigit(lhs);
-        unsigned int rhsDigit = popNextDigit(rhs);
+        unsigned int lhsDigit = popNextDigit(lhsCopy);
+        unsigned int rhsDigit = popNextDigit(rhsCopy);
 
         // TODO: Throw exception if either digit is not 0-9
 
