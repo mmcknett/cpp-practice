@@ -19,7 +19,7 @@ LruCache::TValue LruCache::get(LruCache::TKey key) const
         {
             m_mruList.erase(itKeyInMruList);
         }
-        m_mruList.push_back(key);
+        m_mruList.push_front(key);
 
         return m_cache.at(key);
     }
@@ -40,17 +40,20 @@ void LruCache::set(LruCache::TKey key, LruCache::TValue value)
     }
     else if(m_mruList.size() >= m_capacity)
     {
-        m_cache.erase(m_mruList.front());
-        m_mruList.pop_front();
+        m_cache.erase(m_mruList.back());
+        m_mruList.pop_back();
     }
 
     m_cache[key] = value;
-    m_mruList.push_back(key);
+    m_mruList.push_front(key);
 }
 
 std::vector<std::pair<LruCache::TKey, LruCache::TValue>> LruCache::getFullCache() const
 {
     std::vector<std::pair<LruCache::TKey, LruCache::TValue>> result;
-    std::copy(std::begin(m_cache), std::end(m_cache), std::back_inserter(result));
+    for (const LruCache::TKey& key : m_mruList)
+    {
+        result.push_back(std::pair<LruCache::TKey, LruCache::TValue>(key, m_cache.at(key)));
+    }
     return result;
 }

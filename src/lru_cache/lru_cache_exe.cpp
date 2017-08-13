@@ -1,4 +1,5 @@
 #include <iostream>
+#include <limits>
 #include "lru_cache.h"
 
 void print(const LruCache& cache)
@@ -15,18 +16,44 @@ void print(const LruCache& cache)
 void set(LruCache& cache)
 {
     std::cout << "Enter key then value, space separated positive ints:" << std::endl;
-    LruCache::TKey key;
-    LruCache::TValue value;
+
+    LruCache::TKey key = 0;
+    LruCache::TValue value = LruCache::INVALID;
+
     std::cin >> key;
+    while(std::cin.fail()) {
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
+        std::cout << "No, the key has to be a non-negative integer." << std::endl;
+        std::cin >> key;
+    }
+
     std::cin >> value;
-    cache.set(key, value);
+    while(value < 0 || std::cin.fail()) {
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
+        std::cout << "No, the value has to be non-negative number." << std::endl;
+        std::cin >> value;
+    }
+
+    if (value != LruCache::INVALID)
+    {
+        cache.set(key, value);
+    }
 }
 
 void get(const LruCache& cache)
 {
-    std::cout << "Enter key to retrieve, positive int:" << std::endl;
+    std::cout << "Enter key to retrieve, a non-negative int:" << std::endl;
     LruCache::TKey key;
     std::cin >> key;
+    while(std::cin.fail()) {
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
+        std::cout << "No, the key has to be a non-negative integer." << std::endl;
+        std::cin >> key;
+    }
+
     LruCache::TValue value = cache.get(key);
     std::cout << "==> ";
     if (value == LruCache::INVALID)
@@ -67,7 +94,7 @@ Command readCommand()
     {
         return Command::Print;
     }
-    else if (command == "done")
+    else if (command == "done" || command == "exit")
     {
         return Command::Done;
     }
@@ -111,6 +138,12 @@ int main()
 
     unsigned int capacity;
     std::cin >> capacity;
+    while(capacity < 1 || std::cin.fail()) {
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
+        std::cout << "The capacity has to be a positive integer." << std::endl;
+        std::cin >> capacity;
+    }
 
     LruCache mainLruCache(capacity);
 
