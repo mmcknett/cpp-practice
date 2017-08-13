@@ -2,7 +2,9 @@
 #include "lru_cache.h"
 
 LruCache::LruCache(unsigned int capacity)
-    : m_capacity(capacity)
+    : m_mruHead(nullptr)
+    , m_mruTail(nullptr)
+    , m_capacity(capacity)
 {
     if (m_capacity < 1)
     {
@@ -14,14 +16,9 @@ LruCache::TValue LruCache::get(LruCache::TKey key) const
 {
     if (m_cache.find(key) != std::end(m_cache))
     {
-        auto itKeyInMruList = std::find(std::begin(m_mruList), std::end(m_mruList), key);
-        if (itKeyInMruList != std::end(m_mruList))
-        {
-            m_mruList.erase(itKeyInMruList);
-        }
-        m_mruList.push_front(key);
-
-        return m_cache.at(key);
+        ListNode* valueNode = m_cache.at(key);
+        moveToFront(valueNode);
+        return valueNode->value;
     }
     else
     {
@@ -29,31 +26,91 @@ LruCache::TValue LruCache::get(LruCache::TKey key) const
     }
 }
 
-void LruCache::set(LruCache::TKey key, LruCache::TValue value)
+void LruCache::moveToFront(ListNode* valueNode) const
 {
-    // If the key is in the most-recently-used list already, remove it and
-    // we'll re-add it.  Otherwise, remove the least-recently-used element.
-    auto itKeyInMruList = std::find(std::begin(m_mruList), std::end(m_mruList), key);
-    if (itKeyInMruList != std::end(m_mruList))
+    removeFromList(valueNode);
+    insertAtFront(valueNode);
+}
+
+void LruCache::removeFromList(ListNode* valueNode) const
+{
+    if (valueNode->prev != nullptr)
     {
-        m_mruList.erase(itKeyInMruList);
-    }
-    else if(m_mruList.size() >= m_capacity)
-    {
-        m_cache.erase(m_mruList.back());
-        m_mruList.pop_back();
+        valueNode->prev->next = valueNode->next;
     }
 
-    m_cache[key] = value;
-    m_mruList.push_front(key);
+    if (valueNode->next != nullptr)
+    {
+        valueNode->next->prev = valueNode->prev;
+    }
+
+    if (m_mruHead == valueNode)
+    {
+        m_mruHead = valueNode->next;
+    }
+
+    if (m_mruTail == valueNode)
+    {
+        m_mruTail = valueNode->prev;
+    }
+}
+
+void LruCache::insertAtFront(ListNode* valueNode) const
+{
+    valueNode->next = m_mruHead;
+    valueNode->prev = nullptr;
+
+    if (m_mruHead != nullptr)
+    {
+        m_mruHead->prev = valueNode;
+    }
+
+    m_mruHead = valueNode;
+}
+
+void LruCache::set(LruCache::TKey key, LruCache::TValue value)
+{
+    if (m_cache.find(key) != std::end(m_cache))
+    {
+        ListNode* valueNode = m_cache.at(key);
+        moveToFront(valueNode);
+        valueNode->value = value;
+    }
+    else
+    {
+        ListNode* nodeToInsert = new ListNode;
+        nodeToInsert->key = key;
+        nodeToInsert->value = value;
+        insertAtFront(nodeToInsert);
+        if (m_cache.size() == 0)
+        {
+            m_mruTail = nodeToInsert;
+        }
+
+        m_cache[key] = nodeToInsert;
+    }
+
+    while (m_cache.size() > m_capacity)
+    {
+        m_cache.erase(m_mruTail->key);
+
+        if (m_mruTail->prev != nullptr)
+        {
+            m_mruTail->prev->next = nullptr;
+        }
+
+        ListNode* removedNode = m_mruTail;
+        m_mruTail = m_mruTail->prev;
+        delete removedNode;
+    }
 }
 
 std::vector<std::pair<LruCache::TKey, LruCache::TValue>> LruCache::getFullCache() const
 {
     std::vector<std::pair<LruCache::TKey, LruCache::TValue>> result;
-    for (const LruCache::TKey& key : m_mruList)
+    for (ListNode* curr = m_mruHead; curr != nullptr; curr = curr->next)
     {
-        result.push_back(std::pair<LruCache::TKey, LruCache::TValue>(key, m_cache.at(key)));
+        result.push_back(std::pair<LruCache::TKey, LruCache::TValue>(curr->key, curr->value));
     }
     return result;
 }
