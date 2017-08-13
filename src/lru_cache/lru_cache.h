@@ -23,7 +23,7 @@ public:
 
 private:
     std::map<TKey, TValue> m_cache;
-    std::list<TKey> m_mruList;
+    mutable std::list<TKey> m_mruList;
     unsigned int m_capacity;
 };
 

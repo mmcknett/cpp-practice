@@ -14,6 +14,13 @@ LruCache::TValue LruCache::get(LruCache::TKey key) const
 {
     if (m_cache.find(key) != std::end(m_cache))
     {
+        auto itKeyInMruList = std::find(std::begin(m_mruList), std::end(m_mruList), key);
+        if (itKeyInMruList != std::end(m_mruList))
+        {
+            m_mruList.erase(itKeyInMruList);
+        }
+        m_mruList.push_back(key);
+
         return m_cache.at(key);
     }
     else

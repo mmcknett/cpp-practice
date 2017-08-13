@@ -89,6 +89,39 @@ BOOST_AUTO_TEST_CASE(GetFirstAdded_ThreeIntsSetButTwoHaveSameKeyCapacityIsTwo_Re
     BOOST_CHECK_EQUAL(actual, expected);
 }
 
+BOOST_AUTO_TEST_CASE(GetFirstAdded_ThreeIntsSetCapacityIsTwo_ReturnsInvalid)
+{
+    // Arrange
+    LruCache cache(2);
+    cache.set(key_0, val_0);
+    cache.set(key_1, val_1);
+    cache.set(key_2, val_2);
+    LruCache::TValue expected = LruCache::INVALID;
+
+    // Act
+    LruCache::TValue actual = cache.get(key_0);
+
+    // Assert
+    BOOST_CHECK_EQUAL(actual, expected);
+}
+
+BOOST_AUTO_TEST_CASE(GetFirstAdded_TwoIntsSetFirstAccessedThirdSetCapacityIsTwo_ReturnsFirstValue)
+{
+    // Arrange
+    LruCache cache(2);
+    cache.set(key_0, val_0);
+    cache.set(key_1, val_1);
+    cache.get(key_0);
+    cache.set(key_2, val_2);
+    LruCache::TValue expected = val_0;
+
+    // Act
+    LruCache::TValue actual = cache.get(key_0);
+
+    // Assert
+    BOOST_CHECK_EQUAL(actual, expected);
+}
+
 BOOST_AUTO_TEST_CASE(GetFirstAdded_FourIntsSetCapacityIsThree_ReturnsInvalid)
 {
     // Arrange
