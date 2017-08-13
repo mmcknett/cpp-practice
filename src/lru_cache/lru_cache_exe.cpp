@@ -1,6 +1,7 @@
 #include <iostream>
 #include <limits>
-#include "lru_cache.h"
+#include "lru_cache.h" //The original version is my solution.
+//#include "lru_cache_alternate.h" // The alternate version is an adaptation from a Java solution.
 
 void print(const LruCache& cache)
 {
