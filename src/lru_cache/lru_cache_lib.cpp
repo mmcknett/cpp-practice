@@ -10,11 +10,11 @@ LruCache::LruCache(unsigned int capacity)
     }
 }
 
-LruCache::TValue LruCache::get(LruCache::TKey key)
+LruCache::TValue LruCache::get(LruCache::TKey key) const
 {
     if (m_cache.find(key) != std::end(m_cache))
     {
-        return m_cache[key];
+        return m_cache.at(key);
     }
     else
     {
@@ -39,4 +39,11 @@ void LruCache::set(LruCache::TKey key, LruCache::TValue value)
 
     m_cache[key] = value;
     m_mruList.push_back(key);
+}
+
+std::vector<std::pair<LruCache::TKey, LruCache::TValue>> LruCache::getFullCache() const
+{
+    std::vector<std::pair<LruCache::TKey, LruCache::TValue>> result;
+    std::copy(std::begin(m_cache), std::end(m_cache), std::back_inserter(result));
+    return result;
 }

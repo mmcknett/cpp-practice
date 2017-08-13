@@ -1,8 +1,10 @@
 #ifndef LRU_CACHE_H_INCLUDED
 #define LRU_CACHE_H_INCLUDED
 
-#include <map>
 #include <list>
+#include <map>
+#include <utility>
+#include <vector>
 
 class LruCache
 {
@@ -14,8 +16,10 @@ public:
 
     LruCache(unsigned int capacity);
 
-    TValue get(TKey key);
+    TValue get(TKey key) const;
     void set(TKey key, TValue value);
+
+    std::vector<std::pair<TKey, TValue>> getFullCache() const;
 
 private:
     std::map<TKey, TValue> m_cache;
