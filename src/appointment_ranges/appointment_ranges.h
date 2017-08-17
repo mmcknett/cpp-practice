@@ -20,6 +20,8 @@ struct Appointment
     FreeBusy state;
 };
 
+bool operator<(const Appointment& lhs, const Appointment& rhs);
+
 enum class Pattern
 {
     Empty = 0,
