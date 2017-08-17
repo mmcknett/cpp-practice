@@ -39,7 +39,15 @@ struct Range
     Pattern pattern;
 };
 
+class Ranges
+{
+public:
+    void addRange(Range&& range);
+    const std::vector<Range>& getRanges() const;
 
+private:
+    std::vector<Range> ranges;
+};
 
 inline bool operator==(const Range& lhs, const Range& rhs)
 {
