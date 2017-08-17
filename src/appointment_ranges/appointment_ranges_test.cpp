@@ -58,3 +58,25 @@ BOOST_AUTO_TEST_CASE(getRangesFromAppointments_OneFreeAppointment_ReturnsOneEmpt
     BOOST_CHECK_EQUAL(expectedRanges.size(), actualRanges.size());
     BOOST_TEST(equal(begin(actualRanges), end(actualRanges), begin(expectedRanges)));
 }
+
+BOOST_AUTO_TEST_CASE(getRangesFromAppointments_OneTentativeAppointment_ReturnsEmptyHashedEmpty)
+{
+    // Arrange
+    const int c_apptStart = 60;
+    const int c_apptEnd = 120;
+    vector<Appointment> oneTentativeAppointment {
+        Appointment { c_apptStart, c_apptEnd, FreeBusy::Tentative }
+    };
+    vector<Range> expectedRanges {
+        Range { positionOfMinute(0), positionOfMinute(c_apptStart), Pattern::Empty },
+        Range { positionOfMinute(c_apptStart), positionOfMinute(c_apptEnd), Pattern::Hashed },
+        Range { positionOfMinute(c_apptEnd), positionOfMinute(c_lastMinute), Pattern::Empty }
+    };
+
+    // Act
+    vector<Range> actualRanges = getRangesFromAppointments(oneTentativeAppointment);
+
+    // Assert
+    BOOST_CHECK_EQUAL(expectedRanges.size(), actualRanges.size());
+    BOOST_TEST(equal(begin(actualRanges), end(actualRanges), begin(expectedRanges)));
+}
