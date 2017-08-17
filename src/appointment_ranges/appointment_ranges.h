@@ -18,6 +18,9 @@ struct Appointment
     int startMinute;
     int endMinute;
     FreeBusy state;
+
+    bool startsAfter(int minute) const;
+    bool endsAfter(int minute) const;
 };
 
 bool operator<(const Appointment& lhs, const Appointment& rhs);
@@ -35,6 +38,8 @@ struct Range
     double yEnd;
     Pattern pattern;
 };
+
+
 
 inline bool operator==(const Range& lhs, const Range& rhs)
 {

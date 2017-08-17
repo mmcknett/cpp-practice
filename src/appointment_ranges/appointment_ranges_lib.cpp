@@ -40,18 +40,14 @@ bool isAdjacentToPriorRange(
     return appt.startMinute == priorRangeEndMinute;
 }
 
-bool startsAfterMinute(
-    int minute,
-    const Appointment& appt)
+bool Appointment::startsAfter(int minute) const
 {
-    return appt.startMinute > minute;
+    return startMinute > minute;
 }
 
-bool endsAfterMinute(
-    int minute,
-    const Appointment& appt)
+bool Appointment::endsAfter(int minute) const
 {
-    return appt.endMinute > minute;
+    return endMinute > minute;
 }
 
 void appendOrExtendRange(
@@ -86,14 +82,14 @@ int appendRangesFromAppointments(
         const Appointment& appt = *itCurr;
 
         if (appt.state == FreeBusy::Free ||
-            !endsAfterMinute(priorRangeEndMinute, appt))
+            !appt.endsAfter(priorRangeEndMinute))
         {
             // Ignore free appointments and appointments that don't
             // end after the range we've already considered.
             continue;
         }
 
-        bool spacingRequired = startsAfterMinute(priorRangeEndMinute, appt);
+        bool spacingRequired = appt.startsAfter(priorRangeEndMinute);
 
         // Add an empty range if there is space between the last end and this start.
         if (spacingRequired)
