@@ -1,62 +1,15 @@
 #ifndef APPOINTMENT_RANGES_INCLUDED
 #define APPOINTMENT_RANGES_INCLUDED
 
+#include "appointment.h"
+#include "range.h"
 #include <vector>
 
 const int c_lastMinute = 24 * 60;
 
-// Order matters for sorting.
-enum class FreeBusy
-{
-    Busy = 0,
-    Tentative = 1,
-    Free = 2,
-};
-
-struct Appointment
-{
-    int startMinute;
-    int endMinute;
-    FreeBusy state;
-
-    bool startsAfter(int minute) const;
-    bool endsAfter(int minute) const;
-};
-
-bool operator<(const Appointment& lhs, const Appointment& rhs);
-
-enum class Pattern
-{
-    Empty = 0,
-    Hashed = 1,
-    Solid = 2,
-};
-
-struct Range
-{
-    double yStart;
-    double yEnd;
-    Pattern pattern;
-};
-
-class Ranges
-{
-public:
-    void addRange(Range&& range);
-    const std::vector<Range>& getRanges() const;
-
-private:
-    std::vector<Range> ranges;
-};
-
-inline bool operator==(const Range& lhs, const Range& rhs)
-{
-    return lhs.yStart == rhs.yStart &&
-        lhs.yEnd == rhs.yEnd &&
-        lhs.pattern == rhs.pattern;
-}
-
-double positionOfMinute(int minute);
 std::vector<Range> getRangesFromAppointments(const std::vector<Appointment>& appointments);
+
+Pattern getPatternFromState(FreeBusy state);
+double positionOfMinute(int minute);
 
 #endif /* end of include guard: APPOINTMENT_RANGES_INCLUDED */

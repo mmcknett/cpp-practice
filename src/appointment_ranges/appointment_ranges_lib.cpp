@@ -33,13 +33,6 @@ Pattern getPatternFromState(FreeBusy state)
     }
 }
 
-bool isAdjacentToPriorRange(
-    int priorRangeEndMinute,
-    const Appointment& appt)
-{
-    return appt.startMinute == priorRangeEndMinute;
-}
-
 bool Appointment::startsAfter(int minute) const
 {
     return startMinute > minute;
