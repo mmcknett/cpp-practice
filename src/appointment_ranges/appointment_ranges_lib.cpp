@@ -40,11 +40,18 @@ bool isAdjacentToPriorRange(
     return appt.startMinute == priorRangeEndMinute;
 }
 
-bool endsAfterPriorRange(
-    int priorRangeEndMinute,
+bool startsAfterMinute(
+    int minute,
     const Appointment& appt)
 {
-    return appt.endMinute > priorRangeEndMinute;
+    return appt.startMinute > minute;
+}
+
+bool endsAfterMinute(
+    int minute,
+    const Appointment& appt)
+{
+    return appt.endMinute > minute;
 }
 
 void appendOrExtendRange(
@@ -78,59 +85,59 @@ int appendRangesFromAppointments(
     {
         const Appointment& appt = *itCurr;
 
-        if (appt.state == FreeBusy::Free)
+        if (appt.state == FreeBusy::Free ||
+            !endsAfterMinute(priorRangeEndMinute, appt))
         {
-            // Ignore free appointments.
+            // Ignore free appointments and appointments that don't
+            // end after the range we've already considered.
             continue;
         }
 
-        if (endsAfterPriorRange(priorRangeEndMinute, appt))
+        bool spacingRequired = startsAfterMinute(priorRangeEndMinute, appt);
+
+        // Add an empty range if there is space between the last end and this start.
+        if (spacingRequired)
         {
-            bool adjacentToPriorRange = isAdjacentToPriorRange(priorRangeEndMinute, appt);
+            appendOrExtendRange(
+                Range{
+                    positionOfMinute(priorRangeEndMinute),
+                    positionOfMinute(appt.startMinute),
+                    fillPattern
+                },
+            ranges);
+        }
 
-            // Add an empty range if there is space between the last end and this start.
-            if (!adjacentToPriorRange)
-            {
-                ranges.push_back( Range{ positionOfMinute(priorRangeEndMinute), positionOfMinute(appt.startMinute), fillPattern });
-            }
+        // Use the prior end or the current start, whichever is later.
+        int adjustedStart = std::max(priorRangeEndMinute, appt.startMinute);
+        if (appt.state == FreeBusy::Tentative)
+        {
+            auto itNextNonOverlappingAppt =
+                find_if(itCurr, itEndAppts,
+                    [&appt](const Appointment& other) { return other.startMinute >= appt.endMinute; });
 
-            // Use the prior end or the current start, whichever is later.
-            int adjustedStart = std::max(priorRangeEndMinute, appt.startMinute);
-            if (appt.state == FreeBusy::Tentative)
-            {
-                auto itNextNonOverlappingAppt =
-                    find_if(itCurr, itEndAppts,
-                        [&appt](const Appointment& other) { return other.startMinute >= appt.endMinute; });
-
-                priorRangeEndMinute = appendRangesFromAppointments(
-                    next(itCurr, 1),
-                    itNextNonOverlappingAppt,
-                    adjustedStart,
-                    appt.endMinute,
-                    Pattern::Hashed /*fillPattern*/,
-                    ranges);
-            }
-            else
-            {
-                if (appt.endMinute - adjustedStart > 0)
-                {
-                    Pattern newPattern = getPatternFromState(appt.state);
-                    appendOrExtendRange(
-                        Range {
-                            positionOfMinute(adjustedStart),
-                            positionOfMinute(appt.endMinute),
-                            newPattern
-                        },
-                        ranges);
-
-                    priorRangeEndMinute = appt.endMinute;
-                }
-            }
+            priorRangeEndMinute = appendRangesFromAppointments(
+                next(itCurr, 1),
+                itNextNonOverlappingAppt,
+                adjustedStart,
+                appt.endMinute,
+                Pattern::Hashed /*fillPattern*/,
+                ranges);
         }
         else
         {
-            // Ignore any appointment that ends prior to or at the end of the previous window,
-            // since anything before now takes precedence.
+            if (appt.endMinute - adjustedStart > 0)
+            {
+                Pattern newPattern = getPatternFromState(appt.state);
+                appendOrExtendRange(
+                    Range {
+                        positionOfMinute(adjustedStart),
+                        positionOfMinute(appt.endMinute),
+                        newPattern
+                    },
+                    ranges);
+
+                priorRangeEndMinute = appt.endMinute;
+            }
         }
     }
 
