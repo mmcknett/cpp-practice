@@ -39,6 +39,8 @@ vector<Range> getRangesFromAppointments(vector<Appointment>& appointments)
     int currentEnd = 0;
     for (auto& appt : appointments)
     {
+        bool adjacentToPriorRange = false;
+
         // Ignore anything that ends prior to or at the end of the previous window,
         // since anything before now takes precedence.
         if (appt.endMinute > currentEnd)
@@ -48,6 +50,11 @@ vector<Range> getRangesFromAppointments(vector<Appointment>& appointments)
             {
                 ranges.push_back( Range{ positionOfMinute(currentEnd), positionOfMinute(appt.startMinute), Pattern::Empty });
             }
+            else
+            {
+                // Ranges are adjacent; allow collapsing.
+                adjacentToPriorRange = true;
+            }
 
             // Use the prior end or the current start, whichever is later.
             int adjustedStart = std::max(currentEnd, appt.startMinute);
@@ -55,7 +62,16 @@ vector<Range> getRangesFromAppointments(vector<Appointment>& appointments)
             // Use this range if it's non-zero.
             if (appt.endMinute - adjustedStart > 0)
             {
-                ranges.push_back( Range{ positionOfMinute(adjustedStart), positionOfMinute(appt.endMinute), getPatternFromState(appt.state)});
+                // Check if the previous added pattern is the same.  If so, consolidate.
+                Pattern newPattern = getPatternFromState(appt.state);
+                if (adjacentToPriorRange && !ranges.empty() && ranges.back().pattern == newPattern)
+                {
+                    ranges.back().yEnd = positionOfMinute(appt.endMinute);
+                }
+                else
+                {
+                    ranges.push_back( Range{ positionOfMinute(adjustedStart), positionOfMinute(appt.endMinute), newPattern});
+                }
             }
 
             currentEnd = appt.endMinute;
