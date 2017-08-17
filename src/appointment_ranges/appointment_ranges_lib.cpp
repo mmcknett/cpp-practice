@@ -2,6 +2,13 @@
 
 using namespace std;
 
+bool operator==(const Range& lhs, const Range& rhs)
+{
+    return lhs.yStart == rhs.yStart &&
+        lhs.yEnd == rhs.yEnd &&
+        lhs.pattern == rhs.pattern;
+}
+
 bool operator<(const Appointment& lhs, const Appointment& rhs)
 {
     if (lhs.startMinute != rhs.startMinute)

@@ -1,6 +1,8 @@
 #ifndef RANGE_H_INCLUDED
 #define RANGE_H_INCLUDED
 
+#include <vector>
+
 enum class Pattern
 {
     Empty = 0,
@@ -25,11 +27,6 @@ private:
     std::vector<Range> ranges;
 };
 
-inline bool operator==(const Range& lhs, const Range& rhs)
-{
-    return lhs.yStart == rhs.yStart &&
-        lhs.yEnd == rhs.yEnd &&
-        lhs.pattern == rhs.pattern;
-}
+bool operator==(const Range& lhs, const Range& rhs);
 
 #endif /* end of include guard: RANGE_H_INCLUDED */
