@@ -70,13 +70,41 @@ const vector<Range>& Ranges::getRanges() const
     return ranges;
 }
 
-int appendRangesFromAppointments(
+class RangeMaker
+{
+public:
+    RangeMaker(
+        Pattern fillPattern,
+        Ranges& ranges);
+
+    int appendAppointments(
+        vector<Appointment>::const_iterator itStartAppts,
+        vector<Appointment>::const_iterator itEndAppts,
+        int startTime,
+        int endTime);
+
+private:
+    Range createRange(int startMinute, int endMinute, FreeBusy state);
+    Range createRange(int startMinute, int endMinute);
+    Range createRange(int startMinute, int endMinute, Pattern pattern);
+
+    Pattern _fillPattern;
+    Ranges& _ranges;
+};
+
+RangeMaker::RangeMaker(
+    Pattern fillPattern,
+    Ranges& ranges)
+    : _fillPattern(fillPattern)
+    , _ranges(ranges)
+{
+}
+
+int RangeMaker::appendAppointments(
     vector<Appointment>::const_iterator itStartAppts,
     vector<Appointment>::const_iterator itEndAppts,
     int startTime,
-    int endTime,
-    Pattern fillPattern,
-    Ranges& ranges)
+    int endTime)
 {
     int priorRangeEndMinute = startTime;
 
@@ -97,12 +125,8 @@ int appendRangesFromAppointments(
         // Add an empty range if there is space between the last end and this start.
         if (spacingRequired)
         {
-            ranges.addRange(
-                Range {
-                    positionOfMinute(priorRangeEndMinute),
-                    positionOfMinute(appt.startMinute),
-                    fillPattern
-                });
+            _ranges.addRange(
+                createRange(priorRangeEndMinute, appt.startMinute));
         }
 
         // Use the prior end or the current start, whichever is later.
@@ -113,25 +137,22 @@ int appendRangesFromAppointments(
                 find_if(itCurr, itEndAppts,
                     [&appt](const Appointment& other) { return other.startMinute >= appt.endMinute; });
 
-            priorRangeEndMinute = appendRangesFromAppointments(
+            RangeMaker innerRangeMaker(
+                Pattern::Hashed,
+                _ranges);
+
+            priorRangeEndMinute = innerRangeMaker.appendAppointments(
                 next(itCurr, 1),
                 itNextNonOverlappingAppt,
                 adjustedStart,
-                appt.endMinute,
-                Pattern::Hashed /*fillPattern*/,
-                ranges);
+                appt.endMinute);
         }
         else
         {
             if (appt.endMinute - adjustedStart > 0)
             {
-                Pattern newPattern = getPatternFromState(appt.state);
-                ranges.addRange(
-                    Range {
-                        positionOfMinute(adjustedStart),
-                        positionOfMinute(appt.endMinute),
-                        newPattern
-                    });
+                _ranges.addRange(
+                    createRange(adjustedStart, appt.endMinute, appt.state));
 
                 priorRangeEndMinute = appt.endMinute;
             }
@@ -141,16 +162,32 @@ int appendRangesFromAppointments(
     // Fill any leftover ranges.
     if (priorRangeEndMinute < endTime)
     {
-        ranges.addRange(
-            Range {
-                positionOfMinute(priorRangeEndMinute),
-                positionOfMinute(endTime),
-                fillPattern
-            });
+        _ranges.addRange(
+            createRange(priorRangeEndMinute, endTime));
         priorRangeEndMinute = endTime;
     }
 
     return priorRangeEndMinute;
+}
+
+Range RangeMaker::createRange(int startMinute, int endMinute, FreeBusy state)
+{
+    Pattern patternFromState = getPatternFromState(state);
+    return createRange(startMinute, endMinute, patternFromState);
+}
+
+Range RangeMaker::createRange(int startMinute, int endMinute)
+{
+    return createRange(startMinute, endMinute, _fillPattern);
+}
+
+Range RangeMaker::createRange(int startMinute, int endMinute, Pattern pattern)
+{
+    return Range {
+        positionOfMinute(startMinute),
+        positionOfMinute(endMinute),
+        pattern
+    };
 }
 
 #include <iostream> // for cerr tracing
@@ -171,13 +208,15 @@ vector<Range> getRangesFromAppointments(const vector<Appointment>& appointmentsI
             << endl;
     }
 
-     appendRangesFromAppointments(
-        begin(appointments),
-        end(appointments), //itFirstTentative,
-        0 /*startTime*/,
-        c_lastMinute /*endTime*/,
+    RangeMaker rangeMaker(
         Pattern::Empty /*fillPattern*/,
         ranges);
+
+    rangeMaker.appendAppointments(
+        begin(appointments),
+        end(appointments),
+        0 /*startTime*/,
+        c_lastMinute /*endTime*/);
 
     cerr << "Ranges:" << endl;
     for(auto rg : ranges.getRanges())
