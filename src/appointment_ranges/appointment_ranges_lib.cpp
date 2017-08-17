@@ -4,30 +4,20 @@ using namespace std;
 
 bool operator<(const Appointment& lhs, const Appointment& rhs)
 {
-    if (lhs.state != rhs.state)
-    {
-        return lhs.state < rhs.state;
-    }
-    else if (lhs.startMinute != rhs.startMinute)
+    if (lhs.startMinute != rhs.startMinute)
     {
         return lhs.startMinute < rhs.startMinute;
     }
-    else // endMinute unequal
+    else if(lhs.endMinute != lhs.startMinute)
     {
         // Looks like a bug! Bug we actually want the larger ranges
         // to sort before the shorter ranges, all other things being equal.
         return lhs.endMinute > rhs.endMinute;
     }
-}
-
-void removeFreeAppointments(vector<Appointment>& appointments)
-{
-    auto itNewEndAppts = remove_if(
-        begin(appointments),
-        end(appointments),
-        [](const Appointment & appt) { return appt.state == FreeBusy::Free; }
-    );
-    appointments.erase(itNewEndAppts, end(appointments));
+    else /* (lhs.state != rhs.state)*/
+    {
+        return lhs.state < rhs.state;
+    }
 }
 
 Pattern getPatternFromState(FreeBusy state)
@@ -43,66 +33,132 @@ Pattern getPatternFromState(FreeBusy state)
     }
 }
 
+bool isAdjacentToPriorRange(
+    int priorRangeEndMinute,
+    const Appointment& appt)
+{
+    return appt.startMinute == priorRangeEndMinute;
+}
+
+bool endsAfterPriorRange(
+    int priorRangeEndMinute,
+    const Appointment& appt)
+{
+    return appt.endMinute > priorRangeEndMinute;
+}
+
+void appendOrExtendRange(
+    const Range& newRange,
+    vector<Range>& ranges)
+{
+    // Check if the previous added pattern is the same.  If so, consolidate.
+    if (!ranges.empty() &&
+        ranges.back().yEnd >= newRange.yStart &&
+        ranges.back().pattern == newRange.pattern)
+    {
+        ranges.back().yEnd = newRange.yEnd;
+    }
+    else
+    {
+        ranges.push_back(newRange);
+    }
+}
+
 int appendRangesFromAppointments(
     vector<Appointment>::const_iterator itStartAppts,
     vector<Appointment>::const_iterator itEndAppts,
+    int startTime,
+    int endTime,
+    Pattern fillPattern,
     vector<Range>& ranges)
 {
-    int currentEnd = 0;
+    int priorRangeEndMinute = startTime;
 
-    for_each(itStartAppts, itEndAppts,
-        [&ranges, &currentEnd](const Appointment& appt)
+    for(auto itCurr = itStartAppts; itCurr != itEndAppts; ++itCurr)
+    {
+        const Appointment& appt = *itCurr;
+
+        if (appt.state == FreeBusy::Free)
         {
-            bool adjacentToPriorRange = false;
+            // Ignore free appointments.
+            continue;
+        }
 
-            // Ignore anything that ends prior to or at the end of the previous window,
-            // since anything before now takes precedence.
-            if (appt.endMinute > currentEnd)
+        if (endsAfterPriorRange(priorRangeEndMinute, appt))
+        {
+            bool adjacentToPriorRange = isAdjacentToPriorRange(priorRangeEndMinute, appt);
+
+            // Add an empty range if there is space between the last end and this start.
+            if (!adjacentToPriorRange)
             {
-                // Add an empty range if there is space between the last end and this start.
-                if (appt.startMinute > currentEnd)
-                {
-                    ranges.push_back( Range{ positionOfMinute(currentEnd), positionOfMinute(appt.startMinute), Pattern::Empty });
-                }
-                else
-                {
-                    // Ranges are adjacent; allow collapsing.
-                    adjacentToPriorRange = true;
-                }
+                ranges.push_back( Range{ positionOfMinute(priorRangeEndMinute), positionOfMinute(appt.startMinute), fillPattern });
+            }
 
-                // Use the prior end or the current start, whichever is later.
-                int adjustedStart = std::max(currentEnd, appt.startMinute);
+            // Use the prior end or the current start, whichever is later.
+            int adjustedStart = std::max(priorRangeEndMinute, appt.startMinute);
+            if (appt.state == FreeBusy::Tentative)
+            {
+                auto itNextNonOverlappingAppt =
+                    find_if(itCurr, itEndAppts,
+                        [&appt](const Appointment& other) { return other.startMinute >= appt.endMinute; });
 
-                // Use this range if it's non-zero.
+                priorRangeEndMinute = appendRangesFromAppointments(
+                    next(itCurr, 1),
+                    itNextNonOverlappingAppt,
+                    adjustedStart,
+                    appt.endMinute,
+                    Pattern::Hashed /*fillPattern*/,
+                    ranges);
+            }
+            else
+            {
                 if (appt.endMinute - adjustedStart > 0)
                 {
-                    // Check if the previous added pattern is the same.  If so, consolidate.
                     Pattern newPattern = getPatternFromState(appt.state);
-                    if (adjacentToPriorRange && !ranges.empty() && ranges.back().pattern == newPattern)
-                    {
-                        ranges.back().yEnd = positionOfMinute(appt.endMinute);
-                    }
-                    else
-                    {
-                        ranges.push_back( Range{ positionOfMinute(adjustedStart), positionOfMinute(appt.endMinute), newPattern});
-                    }
-                }
+                    appendOrExtendRange(
+                        Range {
+                            positionOfMinute(adjustedStart),
+                            positionOfMinute(appt.endMinute),
+                            newPattern
+                        },
+                        ranges);
 
-                currentEnd = appt.endMinute;
+                    priorRangeEndMinute = appt.endMinute;
+                }
             }
         }
-    );
+        else
+        {
+            // Ignore any appointment that ends prior to or at the end of the previous window,
+            // since anything before now takes precedence.
+        }
+    }
 
-    return currentEnd;
+    // Fill any leftover ranges.
+    if (priorRangeEndMinute < endTime)
+    {
+        appendOrExtendRange(
+            Range {
+                positionOfMinute(priorRangeEndMinute),
+                positionOfMinute(endTime),
+                fillPattern
+            },
+            ranges
+        );
+        priorRangeEndMinute = endTime;
+    }
+
+    return priorRangeEndMinute;
 }
 
 // GDB isn't happy on my machine
 #include <iostream>
 
-vector<Range> getRangesFromAppointments(vector<Appointment>& appointments)
+vector<Range> getRangesFromAppointments(const vector<Appointment>& appointmentsIn)
 {
     vector<Range> ranges;
 
+    vector<Appointment> appointments(appointmentsIn);
     sort(begin(appointments), end(appointments));
 
     // Tracing
@@ -114,25 +170,20 @@ vector<Range> getRangesFromAppointments(vector<Appointment>& appointments)
             << endl;
     }
 
-    removeFreeAppointments(appointments);
+     appendRangesFromAppointments(
+        begin(appointments),
+        end(appointments), //itFirstTentative,
+        0 /*startTime*/,
+        c_lastMinute /*endTime*/,
+        Pattern::Empty /*fillPattern*/,
+        ranges);
 
-    // Busy will be the first section, then there will be a tentative section.
-    auto itFirstTentative = find_if(begin(appointments), end(appointments),
-        [](const Appointment& appt) { return appt.state == FreeBusy::Tentative; });
-
-    appendRangesFromAppointments(begin(appointments), itFirstTentative, ranges);
-    int currentEnd = appendRangesFromAppointments(
-        itFirstTentative, end(appointments), ranges);
-
-    if (currentEnd != c_lastMinute)
+    cerr << "Ranges:" << endl;
+    for(auto rg : ranges)
     {
-        ranges.push_back(
-            Range {
-                positionOfMinute(currentEnd),
-                positionOfMinute(c_lastMinute),
-                Pattern::Empty
-            }
-        );
+        cerr << "\tRg: " << rg.yStart << " to " << rg.yEnd << ": "
+            << (rg.pattern == Pattern::Empty ? "empty" : (rg.pattern == Pattern::Solid ? "Solid" : "Hashed"))
+            << endl;
     }
 
     return ranges;

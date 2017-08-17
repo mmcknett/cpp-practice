@@ -44,6 +44,6 @@ inline bool operator==(const Range& lhs, const Range& rhs)
 }
 
 double positionOfMinute(int minute);
-std::vector<Range> getRangesFromAppointments(std::vector<Appointment>& appointments);
+std::vector<Range> getRangesFromAppointments(const std::vector<Appointment>& appointments);
 
 #endif /* end of include guard: APPOINTMENT_RANGES_INCLUDED */
