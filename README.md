@@ -16,6 +16,24 @@ After writing my own solution, I also included a C++ port of the provided proble
 solution, which required a hand-rolled doubly-linked-list node structure that could
 be accessed from a map.
 
+## Appointment ranges
+The ```appointment_ranges``` is a full solution to a question I have used for interviews.
+I usually use a visual aid ("PM art") to set the stage for the question, though it
+starts with asking the candidate to design the classes that will be used as
+inputs and outputs to the primary method, then potentially moves on to a solution
+if there's time.
+
+The problem comes down to: given a collection of appointments
+that are either free, busy, or tentative, produce the y-components of rectangles
+that will be used to render a user's free/busy state on the screen.  A user is
+either Busy, rendered with a solid rectangle, Tentative, rendered with a hash-filled
+rectangle, or Free, rendered as a transparent rectangle.  As this solution implies,
+much can be assumed about the input and output, so the solution would vary based
+on each candidate's interpretation and choices.  It's purposefully open-ended.
+
+This is merely my own conception of a correct solution, fully refactored and polished.
+No interview candidate would be expected to produce such a solution. :)
+
 ## LRU Cache
 The ```lru_cache``` folder has an implementation with tests and interactive mode for a
 "Least-Recently Used" cache.  The original problem statement is here:
