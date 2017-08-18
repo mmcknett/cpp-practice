@@ -27,10 +27,12 @@ The problem comes down to: given a collection of appointments
 that are either free, busy, or tentative, produce the y-components of rectangles
 that will be used to render a user's free/busy state on the screen.  A user is
 either Busy, rendered with a solid rectangle, Tentative, rendered with a hash-filled
-rectangle, or Free, rendered as a transparent rectangle.  As the solution implies,
+rectangle, or Free, rendered as a transparent rectangle.  As this solution implies,
 much can be assumed about the input and output, so the solution would vary based
-on each candidate's interpretation and choices.  It's purposefully open-ended.  This
-is merely my own conception of a correct solution.
+on each candidate's interpretation and choices.  It's purposefully open-ended.
+
+This is merely my own conception of a correct solution, fully refactored and polished.
+No interview candidate would be expected to produce such a solution. :)
 
 ## LRU Cache
 The ```lru_cache``` folder has an implementation with tests and interactive mode for a
