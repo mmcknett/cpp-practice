@@ -25,6 +25,7 @@ includes = include_directories(boost_inc)
 
 # Add the sources that comprise your library here.
 lib_sources = ['appointment_ranges_lib.cpp',
+               'appointment.cpp',
                'rangemaker.cpp']
 
 # Add the sources that comprise your unit tests here.
