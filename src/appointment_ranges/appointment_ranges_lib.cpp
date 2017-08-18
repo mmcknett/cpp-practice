@@ -85,11 +85,19 @@ public:
 
 private:
     Range createRange(int startMinute, int endMinute, FreeBusy state);
-    Range createRange(int startMinute, int endMinute);
+    Range fillRange(int startMinute, int endMinute);
     Range createRange(int startMinute, int endMinute, Pattern pattern);
+
+    void init(int startMinutes);
+    void appendAppointmentsOnly(
+        vector<Appointment>::const_iterator itStartAppts,
+        vector<Appointment>::const_iterator itEndAppts);
+    void fillLeftoverRange(int endMinutes);
 
     Pattern _fillPattern;
     Ranges& _ranges;
+
+    int priorRangeEndMinutes;
 };
 
 RangeMaker::RangeMaker(
@@ -97,6 +105,7 @@ RangeMaker::RangeMaker(
     Ranges& ranges)
     : _fillPattern(fillPattern)
     , _ranges(ranges)
+    , priorRangeEndMinutes(0)
 {
 }
 
@@ -106,31 +115,49 @@ int RangeMaker::appendAppointments(
     int startTime,
     int endTime)
 {
-    int priorRangeEndMinute = startTime;
+    init(startTime);
 
+    appendAppointmentsOnly(
+        itStartAppts,
+        itEndAppts);
+
+    fillLeftoverRange(endTime);
+
+    return priorRangeEndMinutes;
+}
+
+void RangeMaker::init(int startMinutes)
+{
+    priorRangeEndMinutes = startMinutes;
+}
+
+void RangeMaker::appendAppointmentsOnly(
+    vector<Appointment>::const_iterator itStartAppts,
+    vector<Appointment>::const_iterator itEndAppts)
+{
     for(auto itCurr = itStartAppts; itCurr != itEndAppts; ++itCurr)
     {
         const Appointment& appt = *itCurr;
 
         if (appt.state == FreeBusy::Free ||
-            !appt.endsAfter(priorRangeEndMinute))
+            !appt.endsAfter(priorRangeEndMinutes))
         {
             // Ignore free appointments and appointments that don't
             // end after the range we've already considered.
             continue;
         }
 
-        bool spacingRequired = appt.startsAfter(priorRangeEndMinute);
+        bool spacingRequired = appt.startsAfter(priorRangeEndMinutes);
 
         // Add an empty range if there is space between the last end and this start.
         if (spacingRequired)
         {
             _ranges.addRange(
-                createRange(priorRangeEndMinute, appt.startMinute));
+                fillRange(priorRangeEndMinutes, appt.startMinute));
         }
 
         // Use the prior end or the current start, whichever is later.
-        int adjustedStart = std::max(priorRangeEndMinute, appt.startMinute);
+        int adjustedStart = std::max(priorRangeEndMinutes, appt.startMinute);
         if (appt.state == FreeBusy::Tentative)
         {
             auto itNextNonOverlappingAppt =
@@ -141,7 +168,7 @@ int RangeMaker::appendAppointments(
                 Pattern::Hashed,
                 _ranges);
 
-            priorRangeEndMinute = innerRangeMaker.appendAppointments(
+            priorRangeEndMinutes = innerRangeMaker.appendAppointments(
                 next(itCurr, 1),
                 itNextNonOverlappingAppt,
                 adjustedStart,
@@ -154,20 +181,21 @@ int RangeMaker::appendAppointments(
                 _ranges.addRange(
                     createRange(adjustedStart, appt.endMinute, appt.state));
 
-                priorRangeEndMinute = appt.endMinute;
+                priorRangeEndMinutes = appt.endMinute;
             }
         }
     }
+}
 
-    // Fill any leftover ranges.
-    if (priorRangeEndMinute < endTime)
+void RangeMaker::fillLeftoverRange(int endMinutes)
+{
+    if (priorRangeEndMinutes < endMinutes)
     {
         _ranges.addRange(
-            createRange(priorRangeEndMinute, endTime));
-        priorRangeEndMinute = endTime;
-    }
+            fillRange(priorRangeEndMinutes, endMinutes));
 
-    return priorRangeEndMinute;
+        priorRangeEndMinutes = endMinutes;
+    }
 }
 
 Range RangeMaker::createRange(int startMinute, int endMinute, FreeBusy state)
@@ -176,7 +204,7 @@ Range RangeMaker::createRange(int startMinute, int endMinute, FreeBusy state)
     return createRange(startMinute, endMinute, patternFromState);
 }
 
-Range RangeMaker::createRange(int startMinute, int endMinute)
+Range RangeMaker::fillRange(int startMinute, int endMinute)
 {
     return createRange(startMinute, endMinute, _fillPattern);
 }
