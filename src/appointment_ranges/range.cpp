@@ -1,4 +1,7 @@
 #include "range.h"
+#include <iostream>
+
+using namespace std;
 
 bool operator==(const Range& lhs, const Range& rhs)
 {
@@ -22,7 +25,18 @@ void Ranges::addRange(Range&& newRange)
     }
 }
 
-const std::vector<Range>& Ranges::getRanges() const
+const vector<Range>& Ranges::getRanges() const
 {
     return ranges;
+}
+
+void Ranges::print() const
+{
+    cerr << "Ranges:" << endl;
+    for(const auto& rg : ranges)
+    {
+        cerr << "\tRg: " << rg.yStart << " to " << rg.yEnd << ": "
+            << (rg.pattern == Pattern::Empty ? "empty" : (rg.pattern == Pattern::Solid ? "Solid" : "Hashed"))
+            << endl;
+    }
 }

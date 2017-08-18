@@ -23,6 +23,8 @@ public:
     void addRange(Range&& range);
     const std::vector<Range>& getRanges() const;
 
+    void print() const;
+
 private:
     std::vector<Range> ranges;
 };
