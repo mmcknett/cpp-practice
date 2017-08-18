@@ -94,10 +94,19 @@ private:
         vector<Appointment>::const_iterator itEndAppts);
     void fillLeftoverRange(int endMinutes);
 
+    bool shouldAppendSolidLayer(const Appointment& appt);
+
+    void appendAppointmentsForNextLayer(
+        const Appointment& currentAppointment,
+        vector<Appointment>::const_iterator itNextAppt,
+        vector<Appointment>::const_iterator itEndAppts,
+        int startMinutes,
+        Pattern nextLayerPattern);
+
     Pattern _fillPattern;
     Ranges& _ranges;
 
-    int priorRangeEndMinutes;
+    int _priorRangeEndMinutes;
 };
 
 RangeMaker::RangeMaker(
@@ -105,7 +114,7 @@ RangeMaker::RangeMaker(
     Ranges& ranges)
     : _fillPattern(fillPattern)
     , _ranges(ranges)
-    , priorRangeEndMinutes(0)
+    , _priorRangeEndMinutes(0)
 {
 }
 
@@ -123,12 +132,12 @@ int RangeMaker::appendAppointments(
 
     fillLeftoverRange(endTime);
 
-    return priorRangeEndMinutes;
+    return _priorRangeEndMinutes;
 }
 
 void RangeMaker::init(int startMinutes)
 {
-    priorRangeEndMinutes = startMinutes;
+    _priorRangeEndMinutes = startMinutes;
 }
 
 void RangeMaker::appendAppointmentsOnly(
@@ -140,39 +149,32 @@ void RangeMaker::appendAppointmentsOnly(
         const Appointment& appt = *itCurr;
 
         if (appt.state == FreeBusy::Free ||
-            !appt.endsAfter(priorRangeEndMinutes))
+            !appt.endsAfter(_priorRangeEndMinutes))
         {
             // Ignore free appointments and appointments that don't
             // end after the range we've already considered.
             continue;
         }
 
-        bool spacingRequired = appt.startsAfter(priorRangeEndMinutes);
+        bool spacingRequired = appt.startsAfter(_priorRangeEndMinutes);
 
         // Add an empty range if there is space between the last end and this start.
         if (spacingRequired)
         {
             _ranges.addRange(
-                fillRange(priorRangeEndMinutes, appt.startMinute));
+                fillRange(_priorRangeEndMinutes, appt.startMinute));
         }
 
         // Use the prior end or the current start, whichever is later.
-        int adjustedStart = std::max(priorRangeEndMinutes, appt.startMinute);
-        if (appt.state == FreeBusy::Tentative)
+        int adjustedStart = std::max(_priorRangeEndMinutes, appt.startMinute);
+        if (shouldAppendSolidLayer(appt))
         {
-            auto itNextNonOverlappingAppt =
-                find_if(itCurr, itEndAppts,
-                    [&appt](const Appointment& other) { return other.startMinute >= appt.endMinute; });
-
-            RangeMaker innerRangeMaker(
-                Pattern::Hashed,
-                _ranges);
-
-            priorRangeEndMinutes = innerRangeMaker.appendAppointments(
+            appendAppointmentsForNextLayer(
+                appt,
                 next(itCurr, 1),
-                itNextNonOverlappingAppt,
+                itEndAppts,
                 adjustedStart,
-                appt.endMinute);
+                Pattern::Hashed);
         }
         else
         {
@@ -181,20 +183,51 @@ void RangeMaker::appendAppointmentsOnly(
                 _ranges.addRange(
                     createRange(adjustedStart, appt.endMinute, appt.state));
 
-                priorRangeEndMinutes = appt.endMinute;
+                _priorRangeEndMinutes = appt.endMinute;
             }
         }
     }
 }
 
+bool RangeMaker::shouldAppendSolidLayer(const Appointment& appt)
+{
+    return (appt.state == FreeBusy::Tentative);
+}
+
+void RangeMaker::appendAppointmentsForNextLayer(
+    const Appointment& currentAppointment,
+    vector<Appointment>::const_iterator itNextAppt,
+    vector<Appointment>::const_iterator itEndAppts,
+    int startMinutes,
+    Pattern nextLayerPattern)
+{
+    auto itNextNonOverlappingAppt =
+        find_if(itNextAppt, itEndAppts,
+            [&currentAppointment](const Appointment& other)
+            {
+                return other.startMinute >= currentAppointment.endMinute;
+            }
+        );
+
+    RangeMaker innerRangeMaker(
+        nextLayerPattern,
+        _ranges);
+
+    _priorRangeEndMinutes = innerRangeMaker.appendAppointments(
+        itNextAppt,
+        itNextNonOverlappingAppt,
+        startMinutes,
+        currentAppointment.endMinute);
+}
+
 void RangeMaker::fillLeftoverRange(int endMinutes)
 {
-    if (priorRangeEndMinutes < endMinutes)
+    if (_priorRangeEndMinutes < endMinutes)
     {
         _ranges.addRange(
-            fillRange(priorRangeEndMinutes, endMinutes));
+            fillRange(_priorRangeEndMinutes, endMinutes));
 
-        priorRangeEndMinutes = endMinutes;
+        _priorRangeEndMinutes = endMinutes;
     }
 }
 
