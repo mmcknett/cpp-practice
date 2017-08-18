@@ -24,7 +24,8 @@ boost_utfw = cc.find_library('boost_unit_test_framework', dirs : boost_lib)
 includes = include_directories(boost_inc)
 
 # Add the sources that comprise your library here.
-lib_sources = ['appointment_ranges_lib.cpp']
+lib_sources = ['appointment_ranges_lib.cpp',
+               'rangemaker.cpp']
 
 # Add the sources that comprise your unit tests here.
 unit_test_sources = ['appointment_ranges_test.cpp']

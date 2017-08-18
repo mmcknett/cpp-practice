@@ -3,6 +3,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "appointment_ranges.h"
+#include "conversions.h"
 
 using namespace std;
 
