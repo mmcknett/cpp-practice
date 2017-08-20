@@ -1,4 +1,4 @@
-project('interview_practice', 'cpp', default_options : ['cpp_std=c++14'])
+project('adder', 'cpp', default_options : ['cpp_std=c++14'])
 
 
 #
@@ -24,7 +24,7 @@ boost_utfw = cc.find_library('boost_unit_test_framework', dirs : boost_lib)
 includes = include_directories(boost_inc)
 
 # Add the sources that comprise your library here.
-#lib_sources = ['adder_alternate_lib.cpp'] # The alternate_lib version is an adaptation from a Java solution.
+alternate_lib_sources = ['adder_alternate_lib.cpp'] # The alternate_lib version is an adaptation from a Java solution.
 lib_sources = ['adder_lib.cpp'] # The original version is my solution.
 
 # Add the sources that comprise your unit tests here.
@@ -35,23 +35,33 @@ exe_sources = ['adder_exe.cpp']
 
 
 adder_lib = static_library(
-          'adder_lib',
-          lib_sources)
+  'adder_lib',
+  lib_sources)
+
+adder_alternate_lib = static_library(
+  'adder_alternate_lib',
+  alternate_lib_sources)
 
 adder_tests = executable(
-          'adder_tests',
-          sources: unit_test_sources,
-          include_directories: includes,
-          link_with: adder_lib,
-          dependencies: boost_utfw)
+  'adder_tests',
+  sources: unit_test_sources,
+  include_directories: includes,
+  link_with: adder_lib,
+  dependencies: boost_utfw)
+
+adder_alternate_tests = executable(
+  'adder_alternate_tests',
+  sources: unit_test_sources,
+  include_directories: includes,
+  link_with: adder_alternate_lib,
+  dependencies: boost_utfw)
 
 adder_exe = executable(
-          'adder',
-          sources: exe_sources,
-          include_directories: includes,
-          link_with: adder_lib,
-# Uncomment this line and add a pch.h file in the pch directory to get a precompiled header.
-#          cpp_pch: 'pch/pch.h',
-          install: true)
+  'adder',
+  sources: exe_sources,
+  include_directories: includes,
+  link_with: adder_lib,
+  install: true)
 
-test('Unit Tests', adder_tests)
+test('Adder Unit Tests', adder_tests)
+test('Adder Alternate Unit Tests', adder_alternate_tests)
