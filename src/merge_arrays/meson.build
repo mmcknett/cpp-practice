@@ -53,4 +53,4 @@ merge_arrays_exe = executable(
 #          cpp_pch: 'pch/pch.h',
           install: true)
 
-test('Unit Tests', merge_arrays_tests)
+test('Merge Array Unit Tests', merge_arrays_tests)
