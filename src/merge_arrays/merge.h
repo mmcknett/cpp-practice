@@ -10,19 +10,27 @@ T* merge(const T lhs[], size_t lhsSize, const T rhs[], size_t rhsSize)
         return nullptr;
     }
 
-    T* result = new T[lhsSize + rhsSize];
-    T* currResult = result;
+    const T* currRhs = rhs;
+    const T* currLhs = lhs;
     const T* lhsEnd = lhs + lhsSize;
     const T* rhsEnd = rhs + rhsSize;
 
-    for (const T* currRhs = rhs; currRhs != rhsEnd; ++currRhs)
+    T* result = new T[lhsSize + rhsSize];
+    T* currResult = result;
+
+    while(currRhs != rhsEnd && currLhs != lhsEnd)
     {
-        *(currResult++) = *currRhs;
+        *(currResult++) = *currLhs < *currRhs ? *currLhs++ : *currRhs++;
     }
 
-    for (const T* currLhs = lhs; currLhs != lhsEnd; ++currLhs)
+    while (currRhs != rhsEnd)
     {
-        *(currResult++) = *currLhs;
+        *(currResult++) = *currRhs++;
+    }
+
+    while (currLhs != lhsEnd)
+    {
+        *(currResult++) = *currLhs++;
     }
 
     return result;
