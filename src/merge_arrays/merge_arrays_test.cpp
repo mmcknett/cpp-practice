@@ -105,3 +105,82 @@ BOOST_AUTO_TEST_CASE(Merge_TwoFloatArraysSecondSortsFirst_MergesArrays)
     BOOST_CHECK(std::equal(std::begin(expected), std::end(expected), result));
     delete[] result;
 }
+
+BOOST_AUTO_TEST_CASE(MergeAll_NoArrays_ReturnsEmptyArray)
+{
+    // Arrange
+    const float *arrays[] {};
+    const size_t sizes[] {};
+
+    // Act
+    float* result = mergeAll(arrays, 0, sizes);
+
+    // Assert
+    BOOST_CHECK(!result);
+    delete[] result;
+}
+
+// Helper function for deleting arrays of arrays...
+// We've begun the descent into madness.
+template<typename T>
+void deleteArrays(const T* arrays[], size_t numArrays)
+{
+    for (auto it = arrays; it != arrays + numArrays; ++it)
+    {
+        delete[] *it;
+    }
+}
+
+BOOST_AUTO_TEST_CASE(MergeAll_OneArray_ReturnsSameArray)
+{
+    // Arrange
+    const float* arrays[] = {
+        new float[3] {1.0f, 2.0f, 3.0f}
+    };
+    const size_t sizes[] = {3};
+
+    const float expected[] {1.0f, 2.0f, 3.0f};
+
+    // Act
+    float* result = mergeAll(arrays, 1, sizes);
+
+    // Assert
+    BOOST_CHECK(std::equal(std::begin(expected), std::end(expected), result));
+    delete[] result;
+    deleteArrays(arrays, 1);
+}
+
+// You could probably generalizre this with variadic templates...
+// I'm not sure how you'd initialize the arrays variable, though.
+struct RaggedArray
+{
+    static constexpr size_t numArrays = 3;
+    const float* arrays[numArrays];
+    const size_t sizes[numArrays];
+
+    // Behold the esoteric C++ ragged array construction.  Essentially, you
+    // MUST declare each entry in the array on the heap or else require that
+    // each entry is fixed size.  (This might be undesirable -- say you have
+    // five lists, one of which has 1000 entries and the others of which have
+    // only 4 entries.  Declaring that would require allocating space for 1000
+    // entries, even for the arrays that only need 4.  So because we don't want
+    // float[1000][5], we use float*[3].)
+    // Excellent explanation on StackOverflow: https://stackoverflow.com/questions/4810664/how-do-i-use-arrays-in-c/4810668#4810668
+    // This is why you use vector<vector<float>> instead.
+    RaggedArray()
+        : arrays {
+            new float[3] {1.0f, 2.0f, 3.0f},
+            new float[2] {1.5f, 5.0f},
+            new float[4] {0.5f, 2.5f, 6.0f}
+        },
+        sizes {3, 2, 4}
+    {
+    }
+
+    ~RaggedArray()
+    {
+        deleteArrays(arrays, numArrays);
+    }
+};
+
+BOOST_GLOBAL_FIXTURE(RaggedArray);
