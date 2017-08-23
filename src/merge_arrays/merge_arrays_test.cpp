@@ -164,14 +164,14 @@ struct RaggedArray
     // five lists, one of which has 1000 entries and the others of which have
     // only 4 entries.  Declaring that would require allocating space for 1000
     // entries, even for the arrays that only need 4.  So because we don't want
-    // float[1000][5], we use float*[3].)
+    // float[4][3], we use float*[3].)
     // Excellent explanation on StackOverflow: https://stackoverflow.com/questions/4810664/how-do-i-use-arrays-in-c/4810668#4810668
     // This is why you use vector<vector<float>> instead.
     RaggedArray()
         : arrays {
             new float[3] {1.0f, 2.0f, 3.0f},
             new float[2] {1.5f, 5.0f},
-            new float[4] {0.5f, 2.5f, 6.0f}
+            new float[4] {0.5f, 2.5f, 4.0f, 6.0f}
         },
         sizes {3, 2, 4}
     {
