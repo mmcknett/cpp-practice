@@ -156,6 +156,8 @@ struct RaggedArray
 {
     static constexpr size_t numArrays = 3;
     const float* arrays[numArrays];
+    static constexpr size_t numExpected = 3 + 2 + 4;
+    const float expected[numExpected];
     const size_t sizes[numArrays];
 
     // Behold the esoteric C++ ragged array construction.  Essentially, you
@@ -173,6 +175,7 @@ struct RaggedArray
             new float[2] {1.5f, 5.0f},
             new float[4] {0.5f, 2.5f, 4.0f, 6.0f}
         },
+        expected {0.5f, 1.0f, 1.5f, 2.0f, 2.5f, 3.0f, 4.0f, 5.0f, 6.0f},
         sizes {3, 2, 4}
     {
     }
@@ -183,4 +186,15 @@ struct RaggedArray
     }
 };
 
-BOOST_GLOBAL_FIXTURE(RaggedArray);
+BOOST_FIXTURE_TEST_CASE(MergeAll_RaggedArrays_ReturnsMergedArray, RaggedArray)
+{
+    // Arrange
+    // Arrange is entirely in the test fixture.
+
+    // Act
+    float* result = mergeAll(arrays, numArrays, sizes);
+
+    // Assert
+    BOOST_CHECK(std::equal(expected, expected + numExpected, result));
+    delete[] result;
+}

@@ -47,12 +47,25 @@ T* mergeAll(const T* arrays[], size_t numArrays, const size_t sizes[])
     T* result = new T[sizes[0]];
     const T* itArray = arrays[0];
     T* itResult = result;
-    for (;
-        itArray != arrays[0] + sizes[0] && itResult != result + sizes[0];
-        ++itArray, ++itResult)
+    while (itArray != arrays[0] + sizes[0] && itResult != result + sizes[0])
     {
-        *itResult = *itArray;
+        *itResult++ = *itArray++;
     }
+
+    const T** itArrays = arrays + 1;
+    const size_t* itSizes = sizes + 1;
+    size_t resultSize = sizes[0];
+    while (itArrays != arrays + numArrays &&
+        itSizes != sizes + numArrays)
+    {
+        auto priorResult = result;
+        result = merge(result, resultSize, *itArrays, *itSizes);
+        resultSize += *itSizes;
+        delete[] priorResult;
+        ++itArrays;
+        ++itSizes;
+    }
+
     return result;
 }
 
