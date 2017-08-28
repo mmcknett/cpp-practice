@@ -1,25 +1,25 @@
 #include <iostream>
 #include "mergesort.h"
 
-std::vector<float> readStdInForFloats();
-void print(const std::vector<float>& floats);
+std::vector<int> readStdInForInts();
+void print(const std::vector<int>& ints);
 
 int main()
 {
     // Run merge sort on standard input.
-    auto floats = readStdInForFloats();
-    mergeSort(floats);
-    print(floats);
+    auto ints = readStdInForInts();
+    mergeSort(ints);
+    print(ints);
     std::cout << std::endl;
 
     return 0;
 }
 
-std::vector<float> readStdInForFloats()
+std::vector<int> readStdInForInts()
 {
-    std::vector<float> inputToSort;
+    std::vector<int> inputToSort;
 
-    float lastInt;
+    int lastInt;
     while(std::cin >> lastInt)
     {
         inputToSort.push_back(lastInt);
@@ -28,10 +28,10 @@ std::vector<float> readStdInForFloats()
     return inputToSort;
 }
 
-void print(const std::vector<float>& floats)
+void print(const std::vector<int>& ints)
 {
-    for (auto it = std::begin(floats); it != std::end(floats); ++it)
+    for (auto it = std::begin(ints); it != std::end(ints); ++it)
     {
-        std::cout << *it << (std::next(it, 1) == std::end(floats) ? "" : " ");
+        std::cout << *it << (std::next(it, 1) == std::end(ints) ? "" : " ");
     }
 }

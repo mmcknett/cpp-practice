@@ -62,3 +62,42 @@ BOOST_AUTO_TEST_CASE(MergeSort_TwoUnsortedElements_ReturnsTwoSortedElements)
     // Assert
     assertVectorsEqual(expected, elements);
 }
+
+BOOST_AUTO_TEST_CASE(MergeSort_ThreeUnsortedElements_ReturnsThreeSortedElements)
+{
+    // Arrange
+    std::vector<float> elements {3.0f, 2.0f, 1.0f};
+    std::vector<float> expected {1.0f, 2.0f, 3.0f};
+
+    // Act
+    mergeSort(elements);
+
+    // Assert
+    assertVectorsEqual(expected, elements);
+}
+
+BOOST_AUTO_TEST_CASE(MergeSort_FourUnsortedElements_ReturnsFourSortedElements)
+{
+    // Arrange
+    std::vector<float> elements {3.0f, 2.0f, 4.0f, 1.0f};
+    std::vector<float> expected {1.0f, 2.0f, 3.0f, 4.0f};
+
+    // Act
+    mergeSort(elements);
+
+    // Assert
+    assertVectorsEqual(expected, elements);
+}
+
+BOOST_AUTO_TEST_CASE(MergeSort_TenUnsortedElements_ReturnsTenSortedElements)
+{
+    // Arrange
+    std::vector<float> elements {3.0f, 9.0f, 2.0f, 6.0f, 4.0f, 0.0f, 1.0f, 7.0f, 8.0f, 5.0f};
+    std::vector<float> expected {0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f};
+
+    // Act
+    mergeSort(elements);
+
+    // Assert
+    assertVectorsEqual(expected, elements);
+}
