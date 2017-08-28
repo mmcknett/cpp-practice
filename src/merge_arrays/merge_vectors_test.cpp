@@ -7,6 +7,11 @@
 
 static const std::vector<float> empty;
 static const std::vector<float> anySortedVector {1.0f, 2.0f, 3.0f};
+static const std::vector<std::vector<float>> anyRaggedVector {
+    {1.0f, 2.0f, 3.0f},
+    {1.5f, 5.0f},
+    {0.5f, 2.5f, 4.0f, 6.0f}};
+static const std::vector<float> anyRaggedVectorMerged {0.5f, 1.0f, 1.5f, 2.0f, 2.5f, 3.0f, 4.0f, 5.0f, 6.0f};
 
 void assertVectorsEqual(const std::vector<float>& expected, const std::vector<float>& actual)
 {
@@ -99,14 +104,13 @@ BOOST_AUTO_TEST_CASE(MergeAll_OneVector_ReturnsSameVector)
     assertVectorsEqual(expected, result);
 }
 
-BOOST_AUTO_TEST_CASE(MergeAll_RaggedVectors_ReturnsMergedVector)
+BOOST_AUTO_TEST_CASE(MergeAll_OneEmptyOneAny_ReturnsExpected)
 {
     // Arrange
     const std::vector<std::vector<float>> vectors {
-        {1.0f, 2.0f, 3.0f},
-        {1.5f, 5.0f},
-        {0.5f, 2.5f, 4.0f, 6.0f}};
-    const std::vector<float> expected {0.5f, 1.0f, 1.5f, 2.0f, 2.5f, 3.0f, 4.0f, 5.0f, 6.0f};
+        empty,
+        anySortedVector};
+    const auto& expected = anySortedVector;
 
     // Act
     auto result = mergeAll(vectors);
@@ -115,13 +119,11 @@ BOOST_AUTO_TEST_CASE(MergeAll_RaggedVectors_ReturnsMergedVector)
     assertVectorsEqual(expected, result);
 }
 
-BOOST_AUTO_TEST_CASE(MergeAll_OneEmptyOneAny_ReturnsExpected)
+BOOST_AUTO_TEST_CASE(MergeAll_RaggedVectors_ReturnsMergedVector)
 {
     // Arrange
-    const std::vector<std::vector<float>> vectors {
-        empty,
-        anySortedVector};
-    const auto& expected = anySortedVector;
+    const auto& vectors = anyRaggedVector;
+    const auto& expected = anyRaggedVectorMerged;
 
     // Act
     auto result = mergeAll(vectors);
@@ -174,11 +176,8 @@ BOOST_AUTO_TEST_CASE(MergeAllFast_OneEmptyOneAny_ReturnsExpected)
 BOOST_AUTO_TEST_CASE(MergeAllFast_RaggedVectors_ReturnsMergedVector)
 {
     // Arrange
-    const std::vector<std::vector<float>> vectors {
-        {1.0f, 2.0f, 3.0f},
-        {1.5f, 5.0f},
-        {0.5f, 2.5f, 4.0f, 6.0f}};
-    const std::vector<float> expected {0.5f, 1.0f, 1.5f, 2.0f, 2.5f, 3.0f, 4.0f, 5.0f, 6.0f};
+    const auto& vectors = anyRaggedVector;
+    const auto& expected = anyRaggedVectorMerged;
 
     // Act
     auto result = mergeAllFast(vectors);
