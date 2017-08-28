@@ -79,13 +79,9 @@ struct ItRangeComparer
     }
 };
 
-// A version of mergeAll with less time and memory complexity.
 template <typename T>
-std::vector<T> mergeAllFast(const std::vector<std::vector<T>>& vectors)
+std::vector<ItRange<T>> getNonEmptyRanges(const std::vector<std::vector<T>>& vectors)
 {
-    std::vector<T> result;
-    // Optimization: Consider using list instead of vector as we're going to Remove
-    // iterators when we're done with them.
     std::vector<ItRange<T>> its;
     its.reserve(vectors.size());
 
@@ -98,22 +94,44 @@ std::vector<T> mergeAllFast(const std::vector<std::vector<T>>& vectors)
         [](const ItRange<T>& range) { return range.itCurrent == range.itEnd; });
     its.erase(itNewEnd, std::end(its));
 
-    // Find the smallest iterator, insert it into the result, and increment.
-    // Then remove it if it's at its end.
+    return its;
+}
+
+// Find the iterator range whose current value is the minimum of all current values,
+// grab the current value, then increment the current iterator for that range.
+// Remove the range if it's empty.
+template <typename T>
+T getNextMinElementAndHandleEmpty(std::vector<ItRange<T>>& its)
+{
+    auto itMinRange = std::min_element(std::begin(its), std::end(its), ItRangeComparer<T>());
+
+    // Extract result and increment.
+    auto& itMinOfAllVectors = itMinRange->itCurrent;
+    T minValue = *itMinOfAllVectors;
+    ++itMinOfAllVectors;
+
+    // Remove the iterators if we've reached the end of their vector.
+    if (itMinRange->itCurrent == itMinRange->itEnd)
+    {
+        its.erase(itMinRange);
+    }
+
+    return minValue;
+}
+
+// A version of mergeAll with less time and memory complexity.
+template <typename T>
+std::vector<T> mergeAllFast(const std::vector<std::vector<T>>& vectors)
+{
+    std::vector<T> result;
+
+    // Optimization: Consider using list instead of vector as we're going to Remove
+    // iterators when we're done with them.
+    std::vector<ItRange<T>> its = getNonEmptyRanges(vectors);
+
     while(!its.empty())
     {
-        auto itMinRange = std::min_element(std::begin(its), std::end(its), ItRangeComparer<T>());
-
-        // Insert into the result and increment.
-        auto& itMinFloatOfAllVectors = itMinRange->itCurrent;
-        result.push_back(*itMinFloatOfAllVectors);
-        ++itMinFloatOfAllVectors;
-
-        // Remove the iterators if we've reached the end of their vector.
-        if (itMinRange->itCurrent == itMinRange->itEnd)
-        {
-            its.erase(itMinRange);
-        }
+        result.push_back(getNextMinElementAndHandleEmpty(its));
     }
 
     return result;
