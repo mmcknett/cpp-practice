@@ -73,14 +73,100 @@ BOOST_AUTO_TEST_CASE(Merge_TwoFloatVectorsSecondSortsFirst_MergesVectors)
     merge_LhsAndRhs_ReturnsExpected(lhs, rhs, expected);
 }
 
-// BOOST_AUTO_TEST_CASE(MergeAll_NoVectors_ReturnsEmptyVector)
-// {
-// }
-//
-// BOOST_AUTO_TEST_CASE(MergeAll_OneVector_ReturnsSameVector)
-// {
-// }
-//
-// BOOST_AUTO_TEST_CASE(MergeAll_RaggedVectors_ReturnsMergedVector)
-// {
-// }
+BOOST_AUTO_TEST_CASE(MergeAll_NoVectors_ReturnsEmptyVector)
+{
+    // Arrange
+    const std::vector<std::vector<float>> noVectors;
+    const auto& expected = empty;
+
+    // Act
+    auto result = mergeAll(noVectors);
+
+    // Assert
+    assertVectorsEqual(expected, result);
+}
+
+BOOST_AUTO_TEST_CASE(MergeAll_OneVector_ReturnsSameVector)
+{
+    // Arrange
+    const std::vector<std::vector<float>> oneVector { anySortedVector };
+    const auto& expected = anySortedVector;
+
+    // Act
+    auto result = mergeAll(oneVector);
+
+    // Assert
+    assertVectorsEqual(expected, result);
+}
+
+BOOST_AUTO_TEST_CASE(MergeAll_RaggedVectors_ReturnsMergedVector)
+{
+    // Arrange
+    const std::vector<std::vector<float>> vectors {
+        {1.0f, 2.0f, 3.0f},
+        {1.5f, 5.0f},
+        {0.5f, 2.5f, 4.0f, 6.0f}};
+    const std::vector<float> expected {0.5f, 1.0f, 1.5f, 2.0f, 2.5f, 3.0f, 4.0f, 5.0f, 6.0f};
+
+    // Act
+    auto result = mergeAll(vectors);
+
+    // Assert
+    assertVectorsEqual(expected, result);
+}
+
+BOOST_AUTO_TEST_CASE(MergeAll_OneEmptyOneAny_ReturnsExpected)
+{
+    // Arrange
+    const std::vector<std::vector<float>> vectors {
+        empty,
+        anySortedVector};
+    const auto& expected = anySortedVector;
+
+    // Act
+    auto result = mergeAll(vectors);
+
+    // Assert
+    assertVectorsEqual(expected, result);
+}
+
+BOOST_AUTO_TEST_CASE(MergeAllFast_NoVectors_ReturnsEmptyVector)
+{
+    // Arrange
+    const std::vector<std::vector<float>> noVectors;
+    const auto& expected = empty;
+
+    // Act
+    auto result = mergeAllFast(noVectors);
+
+    // Assert
+    assertVectorsEqual(expected, result);
+}
+
+BOOST_AUTO_TEST_CASE(MergeAllFast_OneVector_ReturnsSameVector)
+{
+    // Arrange
+    const std::vector<std::vector<float>> oneVector { anySortedVector };
+    const auto& expected = anySortedVector;
+
+    // Act
+    auto result = mergeAllFast(oneVector);
+
+    // Assert
+    assertVectorsEqual(expected, result);
+}
+
+BOOST_AUTO_TEST_CASE(MergeAllFast_OneEmptyOneAny_ReturnsExpected)
+{
+    // Arrange
+    const std::vector<std::vector<float>> vectors {
+        empty,
+        anySortedVector};
+    const auto& expected = anySortedVector;
+
+    // Act
+    auto result = mergeAllFast(vectors);
+
+    // Assert
+    assertVectorsEqual(expected, result);
+}

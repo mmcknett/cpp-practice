@@ -49,6 +49,32 @@ std::vector<T> merge(const std::vector<T>& lhs, const std::vector<T>& rhs)
 template <typename T>
 std::vector<T> mergeAll(const std::vector<std::vector<T>>& vectors)
 {
+    std::vector<T> result;
+
+    if (vectors.size() > 0)
+    {
+        result = vectors[0];
+        for (auto itVecs = std::next(std::begin(vectors), 1); itVecs < std::end(vectors); ++itVecs)
+        {
+            result = merge<T>(result, *itVecs);
+        }
+    }
+
+    return result;
+}
+
+// A version of mergeAll with less time and memory complexity.
+template <typename T>
+std::vector<T> mergeAllFast(const std::vector<std::vector<T>>& vectors)
+{
+    std::vector<T> result;
+
+    if (vectors.size() > 0)
+    {
+        result = vectors[0];
+    }
+
+    return result;
 }
 
 #endif /* end of include guard: MERGE_VECTORS_H_INCLUDED */
