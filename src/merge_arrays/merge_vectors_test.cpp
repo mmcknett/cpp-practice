@@ -3,9 +3,18 @@
 #include <boost/test/unit_test.hpp>
 
 #include "merge_vectors.h"
+#include <vector>
 
-BOOST_AUTO_TEST_CASE(Merge_TwoEmptyFloatVectors_ReturnsNull)
+BOOST_AUTO_TEST_CASE(Merge_TwoEmptyFloatVectors_ReturnsEmptyVector)
 {
+    // Arrange
+    std::vector<float> lhs, rhs;
+
+    // Act
+    auto result = merge(lhs, rhs);
+
+    // Assert
+    BOOST_CHECK_EQUAL(0u, result.size());
 }
 
 // BOOST_AUTO_TEST_CASE(Merge_OneEmptyOneSortedVector_ReturnsCopyOfSortedVector)

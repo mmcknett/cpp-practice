@@ -7,6 +7,7 @@
 template <typename T>
 std::vector<T> merge(const std::vector<T>& lhs, const std::vector<T>& rhs)
 {
+    return std::vector<T>();
 }
 
 // Given a vector of sorted vectors, merge them into a new sorted vector.
