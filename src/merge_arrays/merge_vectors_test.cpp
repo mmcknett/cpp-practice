@@ -6,7 +6,7 @@
 #include <vector>
 
 static const std::vector<float> empty;
-static const std::vector<float> vector1 {1.0f, 2.0f, 3.0f};
+static const std::vector<float> anySortedVector {1.0f, 2.0f, 3.0f};
 
 void assertVectorsEqual(const std::vector<float>& expected, const std::vector<float>& actual)
 {
@@ -31,8 +31,8 @@ BOOST_AUTO_TEST_CASE(Merge_OneEmptyOneSortedVector_ReturnsCopyOfSortedVector)
 {
     // Arrange
     const auto& lhs = empty;
-    const auto& rhs = vector1;
-    const auto& expected = vector1;
+    const auto& rhs = anySortedVector;
+    const auto& expected = anySortedVector;
 
     // Act
     auto result = merge(lhs, rhs);
@@ -44,9 +44,9 @@ BOOST_AUTO_TEST_CASE(Merge_OneEmptyOneSortedVector_ReturnsCopyOfSortedVector)
 BOOST_AUTO_TEST_CASE(Merge_OneSortedOneEmptyVector_ReturnsCopyOfSortedVector)
 {
     // Arrange
-    const auto& lhs = vector1;
+    const auto& lhs = anySortedVector;
     const auto& rhs = empty;
-    const auto& expected = vector1;
+    const auto& expected = anySortedVector;
 
     // Act
     auto result = merge(lhs, rhs);
@@ -55,10 +55,20 @@ BOOST_AUTO_TEST_CASE(Merge_OneSortedOneEmptyVector_ReturnsCopyOfSortedVector)
     assertVectorsEqual(expected, result);
 }
 
-// BOOST_AUTO_TEST_CASE(Merge_TwoFloatVectorsLengthThree_MergesVectors)
-// {
-// }
-//
+BOOST_AUTO_TEST_CASE(Merge_TwoFloatVectorsLengthThree_MergesVectors)
+{
+    // Arrange
+    const std::vector<float> lhs = {2.0f, 3.5f, 6.0f};
+    const std::vector<float> rhs = {3.0f, 4.0f, 4.5f};
+    const std::vector<float> expected = {2.0f, 3.0f, 3.5f, 4.0f, 4.5f, 6.0f};
+
+    // Act
+    auto result = merge(lhs, rhs);
+
+    // Assert
+    assertVectorsEqual(expected, result);
+}
+
 // BOOST_AUTO_TEST_CASE(Merge_TwoFloatVectorsFirstSortsFirst_MergesVectors)
 // {
 // }

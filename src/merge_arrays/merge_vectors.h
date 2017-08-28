@@ -24,7 +24,11 @@ std::vector<T> merge(const std::vector<T>& lhs, const std::vector<T>& rhs)
 
     auto itRhs = std::begin(rhs);
     auto itLhs = std::begin(lhs);
-    //auto itResult = std::begin(result);
+
+    while(itRhs != std::end(rhs) && itLhs != std::end(lhs))
+    {
+        result.push_back(*itLhs < *itRhs ? *itLhs++ : *itRhs++);
+    }
 
     if (itLhs == std::end(lhs))
     {
