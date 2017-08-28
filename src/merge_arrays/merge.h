@@ -36,6 +36,7 @@ T* merge(const T lhs[], size_t lhsSize, const T rhs[], size_t rhsSize)
     return result;
 }
 
+// Given numArrays sorted arrays, merge them into a new sorted array.
 template <typename T>
 T* mergeAll(const T* arrays[], size_t numArrays, const size_t sizes[])
 {

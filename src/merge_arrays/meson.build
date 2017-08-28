@@ -24,7 +24,6 @@ boost_utfw = cc.find_library('boost_unit_test_framework', dirs : boost_lib)
 includes = include_directories(boost_inc)
 
 # Add the sources that comprise your library here.
-lib_sources = ['merge_arrays_lib.cpp']
 
 # Add the sources that comprise your unit tests here.
 unit_test_sources = ['merge_arrays_test.cpp']
@@ -32,16 +31,16 @@ unit_test_sources = ['merge_arrays_test.cpp']
 # Add the sources that comprise your executable here.
 exe_sources = ['merge_arrays_exe.cpp']
 
-
-merge_arrays_lib = static_library(
-          'merge_arrays_lib',
-          lib_sources)
-
 merge_arrays_tests = executable(
           'merge_arrays_tests',
           sources: unit_test_sources,
           include_directories: includes,
-          link_with: merge_arrays_lib,
+          dependencies: boost_utfw)
+
+merge_vectors_tests = executable(
+          'merge_vectors_tests',
+          sources: unit_test_sources,
+          include_directories: includes,
           dependencies: boost_utfw)
 
 merge_arrays_exe = executable(
@@ -49,8 +48,7 @@ merge_arrays_exe = executable(
           sources: exe_sources,
           include_directories: includes,
           link_with: merge_arrays_lib,
-# Uncomment this line and add a pch.h file in the pch directory to get a precompiled header.
-#          cpp_pch: 'pch/pch.h',
           install: true)
 
-test('Merge Array Unit Tests', merge_arrays_tests)
+test('Merge Arrays Unit Tests', merge_arrays_tests)
+test('Merge Vectors Unit Tests', merge_vectors_tests)
