@@ -31,7 +31,7 @@ vectors_unit_test_sources = ['merge_vectors_test.cpp']
 mergesort_unit_test_sources = ['mergesort_test.cpp']
 
 # Add the sources that comprise your executable here.
-exe_sources = ['merge_arrays_exe.cpp']
+array_init_test_exe_sources = ['array_init_test.cpp']
 
 merge_arrays_tests = executable(
           'merge_arrays_tests',
@@ -51,9 +51,9 @@ mergesort_tests = executable(
           include_directories: includes,
           dependencies: boost_utfw)
 
-merge_arrays_exe = executable(
-          'merge_arrays',
-          sources: exe_sources,
+array_init_test_exe = executable(
+          'array_init_test',
+          sources: array_init_test_exe_sources,
           include_directories: includes,
           install: true)
 
