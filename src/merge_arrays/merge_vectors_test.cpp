@@ -69,14 +69,34 @@ BOOST_AUTO_TEST_CASE(Merge_TwoFloatVectorsLengthThree_MergesVectors)
     assertVectorsEqual(expected, result);
 }
 
-// BOOST_AUTO_TEST_CASE(Merge_TwoFloatVectorsFirstSortsFirst_MergesVectors)
-// {
-// }
-//
-// BOOST_AUTO_TEST_CASE(Merge_TwoFloatVectorsSecondSortsFirst_MergesVectors)
-// {
-// }
-//
+BOOST_AUTO_TEST_CASE(Merge_TwoFloatVectorsFirstSortsFirst_MergesVectors)
+{
+    // Arrange
+    const std::vector<float> lhs = {2.0f, 3.5f, 6.0f, 7.0f};
+    const std::vector<float> rhs = {8.0f, 10.0f, 10.5f};
+    const std::vector<float> expected = {2.0f, 3.5f, 6.0f, 7.0f, 8.0f, 10.0f, 10.5f};
+
+    // Act
+    auto result = merge(lhs, rhs);
+
+    // Assert
+    assertVectorsEqual(expected, result);
+}
+
+BOOST_AUTO_TEST_CASE(Merge_TwoFloatVectorsSecondSortsFirst_MergesVectors)
+{
+    // Arrange
+    const std::vector<float> lhs = {10.0f, 11.0f, 12.0f};
+    const std::vector<float> rhs = {5.0f, 8.5f};
+    const std::vector<float> expected = {5.0f, 8.5f, 10.0f, 11.0f, 12.0f};
+
+    // Act
+    auto result = merge(lhs, rhs);
+
+    // Assert
+    assertVectorsEqual(expected, result);
+}
+
 // BOOST_AUTO_TEST_CASE(MergeAll_NoVectors_ReturnsEmptyVector)
 // {
 // }
