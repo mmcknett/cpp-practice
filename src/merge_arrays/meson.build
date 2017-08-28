@@ -28,6 +28,7 @@ includes = include_directories(boost_inc)
 # Add the sources that comprise your unit tests here.
 arrays_unit_test_sources = ['merge_arrays_test.cpp']
 vectors_unit_test_sources = ['merge_vectors_test.cpp']
+mergesort_unit_test_sources = ['mergesort_test.cpp']
 
 # Add the sources that comprise your executable here.
 exe_sources = ['merge_arrays_exe.cpp']
@@ -44,6 +45,12 @@ merge_vectors_tests = executable(
           include_directories: includes,
           dependencies: boost_utfw)
 
+mergesort_tests = executable(
+          'mergesort_tests',
+          sources: mergesort_unit_test_sources,
+          include_directories: includes,
+          dependencies: boost_utfw)
+
 merge_arrays_exe = executable(
           'merge_arrays',
           sources: exe_sources,
@@ -52,3 +59,4 @@ merge_arrays_exe = executable(
 
 test('Merge Arrays Unit Tests', merge_arrays_tests)
 test('Merge Vectors Unit Tests', merge_vectors_tests)
+test('MergeSort Unit Tests', mergesort_tests)
