@@ -63,15 +63,57 @@ std::vector<T> mergeAll(const std::vector<std::vector<T>>& vectors)
     return result;
 }
 
+template <typename T>
+struct ItRange
+{
+    typename std::vector<T>::const_iterator itCurrent;
+    typename std::vector<T>::const_iterator itEnd;
+};
+
+template <typename T>
+struct ItRangeComparer
+{
+    bool operator()(const ItRange<T>& lhs, const ItRange<T>& rhs)
+    {
+        return *(lhs.itCurrent) < *(rhs.itCurrent);
+    }
+};
+
 // A version of mergeAll with less time and memory complexity.
 template <typename T>
 std::vector<T> mergeAllFast(const std::vector<std::vector<T>>& vectors)
 {
     std::vector<T> result;
+    // Optimization: Consider using list instead of vector as we're going to Remove
+    // iterators when we're done with them.
+    std::vector<ItRange<T>> its;
+    its.reserve(vectors.size());
 
-    if (vectors.size() > 0)
+    // Get the start & end iterators for all the vectors.
+    std::transform(std::begin(vectors), std::end(vectors), std::back_inserter(its),
+        [](const std::vector<T>& vector) -> ItRange<T> { return { std::begin(vector), std::end(vector) }; });
+
+    // Remove any iterators for empty vectors.
+    auto itNewEnd = std::remove_if(std::begin(its), std::end(its),
+        [](const ItRange<T>& range) { return range.itCurrent == range.itEnd; });
+    its.erase(itNewEnd, std::end(its));
+
+    // Find the smallest iterator, insert it into the result, and increment.
+    // Then remove it if it's at its end.
+    while(!its.empty())
     {
-        result = vectors[0];
+        auto itMinRange = std::min_element(std::begin(its), std::end(its), ItRangeComparer<T>());
+
+        // Insert into the result and increment.
+        auto& itMinFloatOfAllVectors = itMinRange->itCurrent;
+        result.push_back(*itMinFloatOfAllVectors);
+        ++itMinFloatOfAllVectors;
+
+        // Remove the iterators if we've reached the end of their vector.
+        if (itMinRange->itCurrent == itMinRange->itEnd)
+        {
+            its.erase(itMinRange);
+        }
     }
 
     return result;

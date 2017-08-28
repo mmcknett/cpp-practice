@@ -170,3 +170,19 @@ BOOST_AUTO_TEST_CASE(MergeAllFast_OneEmptyOneAny_ReturnsExpected)
     // Assert
     assertVectorsEqual(expected, result);
 }
+
+BOOST_AUTO_TEST_CASE(MergeAllFast_RaggedVectors_ReturnsMergedVector)
+{
+    // Arrange
+    const std::vector<std::vector<float>> vectors {
+        {1.0f, 2.0f, 3.0f},
+        {1.5f, 5.0f},
+        {0.5f, 2.5f, 4.0f, 6.0f}};
+    const std::vector<float> expected {0.5f, 1.0f, 1.5f, 2.0f, 2.5f, 3.0f, 4.0f, 5.0f, 6.0f};
+
+    // Act
+    auto result = mergeAllFast(vectors);
+
+    // Assert
+    assertVectorsEqual(expected, result);
+}
