@@ -32,6 +32,7 @@ mergesort_unit_test_sources = ['mergesort_test.cpp']
 
 # Add the sources that comprise your executable here.
 array_init_test_exe_sources = ['array_init_test.cpp']
+mergesort_exe_sources = ['ms.cpp']
 
 merge_arrays_tests = executable(
           'merge_arrays_tests',
@@ -54,6 +55,12 @@ mergesort_tests = executable(
 array_init_test_exe = executable(
           'array_init_test',
           sources: array_init_test_exe_sources,
+          include_directories: includes,
+          install: true)
+
+mergesort_exe = executable(
+          'ms',
+          sources: mergesort_exe_sources,
           include_directories: includes,
           install: true)
 
